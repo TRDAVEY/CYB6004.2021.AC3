@@ -3,13 +3,11 @@
 # Extract and display only IP addresses, and not subnet mask or broadcast addresses.
 # This method uses a sed piping into another sed. The first sed breaks out the IP addresses, and spaces the other information onto different lines
 # Then, when the second sed comes along, it only grabs the IP Address line using a 'pattern' match, which is ultimately displayed via echo -e
-addresses=$(ifconfig | sed -n '/inet / { 
-s/inet/IP Address:/ 
-s/netmask/\n/ 
-s/broadcast/\n/ 
 
-p
-}' | sed -n '/IP Address:/ {p}')
+# Check if ipInfo.sh is present
+[[ ! -f ./ipInfo.sh ]] && echo -e "\033[31mERROR: ipInfo.sh is not present! \033[0m" && exit 1
+# Check if ipInfo,sh is executable
+[[ ! -x ./ipInfo.sh ]] && echo -e "\033[31mERROR: ipInfo.sh is not executable! \033[0m" && exit 2
 
-# Output the found IP addresses, and nothing else.
-echo -e "$addresses" 
+# Sed the output of ipInfo.sh into a sed pattern match for only the IP Address: lines, which outputs to the terminal.
+./ipInfo.sh | sed -n '/IP Address:/ {p}'
