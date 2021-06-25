@@ -27,4 +27,4 @@ while [[ ! "$REPLY" -eq "42" ]]; do
 done
 
 # Inform the user they have guessed correctly
-echo -e "\033[32mCorrect!\033[0m"
+echo -e "\033[32mRight!\033[0m"
