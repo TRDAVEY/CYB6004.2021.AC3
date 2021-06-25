@@ -4,6 +4,8 @@
 # All output is formatted as a standard formatted table with width modifiers
 # All text is left justified
 
+
+
 awk -F: 'BEGIN{
     # Print headings - Each heading wrapped in blue colouring
     printf("| %s%-15s%s | %s%-10s%s | %s%-10s%s | %s%-15s%s | %s%-15s%s |\n",
@@ -19,21 +21,21 @@ awk -F: 'BEGIN{
     "\033[34m","Shell", "\033[0m")
 
     # Print lower line of the table below the headings
-    printf("| %-15s | %-10s | %-10s | %-15s | %-15s |\n",
-        "_______________",
-        "__________",
-        "__________",
-        "_______________",
-        "_______________")
+    printf("|%-15s|%-10s|%-10s|%-15s|%-15s|\n",
+        "_________________",
+        "____________",
+        "____________",
+        "_________________",
+        "_________________")
 }
 
 # For each line that contains /bin/bash, print the following table:
 /\/bin\/bash$/ {
-    printf("| %-15s | %-10s | %-10s | %-15s | %-15s |\n",
-    $1,
-    $3,
-    $4,
-    $6,
-    $7)
+    printf("| %s%-15s%s | %s%-10s%s | %s%-10s%s | %s%-15s%s | %s%-15s%s |\n",
+    "\033[33m",$1,"\033[0m",
+    "\033[35m",$3,"\033[0m",
+    "\033[35m",$4,"\033[0m",
+    "\033[35m",$6,"\033[0m",
+    "\033[35m",$7,"\033[0m")
 }
 ' /etc/passwd
