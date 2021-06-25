@@ -8,7 +8,7 @@
 
 awk -F: 'BEGIN{
     # Print headings - Each heading wrapped in blue colouring
-    printf("| %s%-15s%s | %s%-10s%s | %s%-10s%s | %s%-15s%s | %s%-15s%s |\n",
+    printf("| %s%-18s%s | %s%-10s%s | %s%-10s%s | %s%-22s%s | %s%-20s%s |\n",
     # Username
     "\033[34m", "Username","\033[0m",
     # UserID
@@ -21,17 +21,17 @@ awk -F: 'BEGIN{
     "\033[34m","Shell", "\033[0m")
 
     # Print lower line of the table below the headings
-    printf("|%-15s|%-10s|%-10s|%-15s|%-15s|\n",
-        "_________________",
+    printf("|%-18s|%-10s|%-10s|%-22s|%-20s|\n",
+        "____________________",
         "____________",
         "____________",
-        "_________________",
-        "_________________")
+        "________________________",
+        "______________________")
 }
 
-# For each line that contains /bin/bash, print the following table:
-/\/bin\/bash$/ {
-    printf("| %s%-15s%s | %s%-10s%s | %s%-10s%s | %s%-15s%s | %s%-15s%s |\n",
+# For each line print the following table:
+{
+    printf("| %s%-18s%s | %s%-10s%s | %s%-10s%s | %s%-22s%s | %s%-20s%s |\n",
     "\033[33m",$1,"\033[0m",
     "\033[35m",$3,"\033[0m",
     "\033[35m",$4,"\033[0m",
