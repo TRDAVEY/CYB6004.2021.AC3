@@ -84,11 +84,8 @@ importPreProcessedData()
 
         # Each field is added to it's respective array
         jsonID+=(${tmpLineArray[0]})
-        #echo ${tmpLineArray[0]}
         jsonScore+=(${tmpLineArray[1]})
-        #echo ${tmpLineArray[1]}
         jsonDesc+=(${tmpLineArray[2]})
-        #echo ${tmpLineArray[2]}
     done < $dirWorkspace/$fileJsonParsedDataName
 }
 
@@ -111,7 +108,6 @@ updateJSON()
 
     # For some reason, wget exits with code 4, which is a network error, thus I cannot test if it succeeds directly
     # Thus I opt to test if the file has been created and go from there.
-
     if [ ! -s $dirWorkspace/$fileJsonGzName ]; then
         displayError "Could not retrive JSON data from NIST!"
         exitScript "" 1 # Could not download JSON data
@@ -129,11 +125,10 @@ processJSON()
 {
     displayInfo "Processing JSON information ... Please wait"
 
-    # Grab vulnerabilities and put into an object
-    echo "jsonItems"
+    # Grab vulnerabilities and put into an array
+    
     jsonItems=$(cat $dirWorkspace/$fileJsonJsonName | jq '."CVE_Items" | keys | .[]')
     
-    echo "jsonParse"
     # Sort all items into parallel arrays
     # CVE ID, score, breif description
     for index in $jsonItems;
@@ -167,10 +162,8 @@ processJSON()
         printf '%s%s%s%s%s\n' "$tmpID" "$fileDataDelimiter" "$tmpScore" "$fileDataDelimiter" "$tmpDesc" >> $dirWorkspace/$fileJsonParsedDataName
         
     done
+
     displayInfo "JSON processing complete!"
-    #echo $jsonItems
-    #echo $jsonID
-    #echo $jsonScore
 }
 
 
@@ -180,6 +173,7 @@ searchMenu()
 {
     # Clears the terminal the script is being run in, to make it appear more presentable
     clear
+
     # Loop infinitely, until exited or returned
     while true 
     do
@@ -189,7 +183,10 @@ searchMenu()
         echo -e "2) Exit back to main menu"
 
         read menuOption
+        # Clears the terminal
         clear
+
+        # User input determines where the script goes from here. 
         case $menuOption in
             1)
                 local searchterm
@@ -252,11 +249,11 @@ displayCVE()
         printf("\x1b[1mCVE ID: %-15s\x1b[0m\nScore: %-4s\nDescription:\n%-30s\n", $1, $2, $3)
         printf("%s", "_______________________________\n")
     }
-    ' "${1}"  | sed -E -e "s/Score: [0-3].[0-9]/$colGreen&$colReset/g" | # Low CVE scores are coloured green
-    sed -E -e "s/Score: [4-7].[0-9]/$colYellow&$colReset/g" | # Medium CVE scores are coloured yellow
-    sed -E -e "s/Score: [8-9].[0-9]/$colRed&$colReset/g" | # High CVE scores are coloured red foreground
-    sed -E -e "s/Score: 10.[0-9]/$colBlack$colRedBG&$colReset/g" |# Max CVE scores are coloured red background and black foreground
-    less -r
+    ' "${1}" | sed -E -e "s/Score:\s+[0-3]\.?[0-9]?/$colGreen&$colReset/g" | # Low CVE scores are coloured green
+    sed -E -e "s/Score:\s+[4-7]\.?[0-9]?/$colYellow&$colReset/g" | # Medium CVE scores are coloured yellow
+    sed -E -e "s/Score:\s+[8-9]\.?[0-9]?/$colRed&$colReset/g" | # High CVE scores are coloured red foreground
+    sed -E -e "s/Score: 10[\.\d]{0,2}/$colBlack$colRedBG&$colReset/g" | # Max CVE scores are coloured red background and black foreground
+    less -R # Use 'less' to add navigability to the output of data
 }
 
 # A separate display function very similar to the other, but formatted differently as passing variables as files vs variables behaves differently.
@@ -265,9 +262,14 @@ displaySearchResults()
 {
     # Clears the terminal the script is being run in, to make it appear more presentable
     clear
-    #echo "displayCVE" >&2
+    
+    # Initialise local variables
     local dataSource=$1
     local searchstr=$2
+
+    if [ -z $searchstr ]; then
+        $searchstr=" "
+    fi
     
     cat $dataSource | # Reads out the data to be displayed
     grep -P $searchstr | # Filters down the data to only show information containing the input search term
@@ -280,11 +282,11 @@ displaySearchResults()
         printf("\x1b[1mCVE ID: %-15s\x1b[0m\nScore: %-4s\nDescription:\n%-30s\n", $1, $2, $3)
         printf("%s", "_______________________________\n")
     }
-    ' | sed -E -e "s/Score: [0-3].[0-9]/$colGreen&$colReset/g" | # Low CVE scores are coloured green
-    sed -E -e "s/Score: [4-7].[0-9]/$colYellow&$colReset/g" | # Medium CVE scores are coloured yellow
-    sed -E -e "s/Score: [8-9].[0-9]/$colRed&$colReset/g" | # High CVE scores are coloured red foreground
-    sed -E -e "s/Score: 10.[0-9]/$colBlack$colRedBG&$colReset/g" |# Max CVE scores are coloured red background and black foreground
-    less -r
+    ' | sed -E -e "s/Score:\s+[0-3]\.?[0-9]?/$colGreen&$colReset/g" | # Low CVE scores are coloured green
+    sed -E -e "s/Score:\s+[4-7]\.?[0-9]?/$colYellow&$colReset/g" | # Medium CVE scores are coloured yellow
+    sed -E -e "s/Score:\s+[8-9]\.?[0-9]?/$colRed&$colReset/g" | # High CVE scores are coloured red foreground
+    sed -E -e "s/Score: 10[\.\d]{0,2}/$colBlack$colRedBG&$colReset/g" | # Max CVE scores are coloured red background and black foreground
+    less -R # Use 'less' to add navigability to the output of data
 }
 
 mainMenu()
@@ -293,11 +295,10 @@ mainMenu()
     # Clears the terminal the script is being run in, to make it appear more presentable
     clear
 
-    
     # Loop infinitely, until exited or returned
     while true
     do
-    # Prints the script banner ASCII art
+    # Prints the script banner ASCII art - VULN SEARCH
     printMOTD
         # Menu asks if you want to view all CVEs, search, or exit
         echo -e "Please select an option:
@@ -322,6 +323,7 @@ mainMenu()
                     exitScript "Goodbye!" 0
                 ;;
                 *)
+                    clear
                     displayError "Invalid selection! Please try again"
                 ;;
         esac
@@ -330,6 +332,13 @@ mainMenu()
 
 
 ##### MAIN #####
+# This section is what starts the script.
+# First, the script checks if there is a workspace folder, which if it doesn't exist, creates it
+# Second, the script checks if there is any JSON data stored locally within the Workspace folder
+#   If there is none, it will download it from the NIST website
+# Lastly, the script starts the main menu, where the user can navigate data though a full dump
+#   or searching the data using the search function.
+
 
 # Check if workspace folder is created
 checkWorkspace
